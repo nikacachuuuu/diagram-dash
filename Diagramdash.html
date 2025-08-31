@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organ Quiz Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body { 
+    font-family: 'Roboto', sans-serif; 
+    margin: 0; 
+    padding: 0; 
+    text-align: center; 
+    background-color: #2fd3d6;
+  }
+
+  /* Stylish Start Page */
+  #start-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #1e3c72;
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+  }
+
+  #start-page h1 {
+    font-size: 4em;
+    margin-bottom: 20px;
+    text-shadow: 3px 3px 15px rgba(0,0,0,0.4);
+    letter-spacing: 2px;
+  }
+
+  #start-page p {
+    font-size: 1.5em;
+    margin-bottom: 50px;
+    color: #dcdcdc;
+    max-width: 600px;
+  }
+
+  #start-page button {
+    font-size: 1.5em;
+    background-color: #ff9800;
+    color: #fff;
+    padding: 20px 60px;
+    border-radius: 15px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+  }
+
+  #start-page button:hover {
+    background-color: #fb8c00;
+    transform: scale(1.05);
+    box-shadow: 0 15px 25px rgba(0,0,0,0.4);
+  }
+
+  /* Common Container */
+  .container { 
+    max-width: 700px; 
+    margin: 50px auto; 
+    padding: 30px; 
+    background-color: #fff; 
+    border-radius: 12px; 
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1); 
+    color: #333;
+    position: relative; 
+  }
+
+  h1 { margin-bottom: 20px; }
+
+  .option-btn, .level-btn { 
+    padding: 12px 25px; 
+    margin: 10px 5px; 
+    border: none; 
+    border-radius: 8px; 
+    font-size: 16px; 
+    cursor: pointer; 
+    transition: all 0.3s; 
+    display: block; 
+    width: 80%; 
+    margin-left:auto; 
+    margin-right:auto;
+  }
+
+  .option-btn { background-color: #1a73e8; color: #fff; }
+  .option-btn:hover { background-color: #155ab6; }
+  .level-btn { background-color: #ff9800; color: #fff; }
+  .level-btn:hover { background-color: #fb8c00; }
+
+  #score { font-weight: bold; margin-top: 10px; color: #1a73e8; }
+  #home-btn { position: absolute; top: 20px; right: 20px; background-color: #eeeee8; color: #000; width: auto; padding: 10px 20px; border-radius: 8px; font-size: 14px; z-index: 10; border: none; cursor: pointer; transition: all 0.3s; }
+  #home-btn:hover { background-color: #e64a19; color:#fff; }
+
+  .image-options { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin-top: 20px; }
+  .image-options img { width: 120px; height: 120px; border: 2px solid #888; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
+  .image-options img:hover { border-color: #1a73e8; transform: scale(1.05); }
+
+  .number-box { width: 100px; height: 50px; border: 2px solid #888; border-radius: 8px; margin: 5px; display: inline-block; vertical-align: top; line-height: 50px; font-weight: bold; background-color: #f0f0f0; }
+  .drag-options { margin-top: 20px; display: flex; flex-wrap: wrap; justify-content: center; gap:10px; }
+
+</style>
+</head>
+<body>
+
+<!-- Start Page -->
+<div id="start-page">
+  <h1>🧠<br> Organ Quiz Game</h1>
+  <p>Test your knowledge of human organs and challenge yourself!</p>
+  <button onclick="showIntro()">Start Game</button>
+</div>
+
+<!-- Intro Page -->
+<div id="intro" class="container" style="display:none;">
+  <h1>Choose Your Difficulty Level</h1>
+  <button class="level-btn" onclick="startGame('easy')">Easy</button>
+  <button class="level-btn" onclick="startGame('medium')">Medium</button>
+  <button class="level-btn" onclick="startGame('hard')">Hard</button>
+</div>
+
+<!-- Game Page -->
+<div id="game" class="container" style="display:none;">
+  <button id="home-btn" onclick="goHome()">🏠 Home</button>
+  <h1 id="game-title">Identify the Organ</h1>
+  <div id="game-content">
+    <div id="organ-description" style="font-size:14px; color:#333; margin-bottom:20px;"></div>
+    <div id="options-container"></div>
+    <p id="score">Score: 0</p>
+  </div>
+</div>
+
+<script>
+/* ----- Game Data ----- */
+const organsData = {
+  easy: [
+    {name:"Heart",image:"https://cdn1.iconfinder.com/data/icons/organ-donation-filled-outline/64/heart-organ-anatomy-1024.png",options:["Lungs","Heart","Intestine"],correct:"Heart"},
+    {name:"Brain",image:"https://cdn-icons-png.flaticon.com/512/9044/9044199.png",options:["Heart","Lungs","Brain"],correct:"Brain"},
+    {name:"Intestine",image:"https://cdn4.iconfinder.com/data/icons/human-organs-1-1/126/Intestine-colon-rectum-digestive-system-1024.png",options:["Intestine","Liver","Heart"],correct:"Intestine"},
+    {name:"Lungs",image:"https://cdn2.iconfinder.com/data/icons/scribble-human-organ/512/Lungs-1024.png",options:["Eyes","Lungs","Intestine"],correct:"Lungs"}
+  ],
+  medium: [
+    {name:"Heart", description:"A muscular organ roughly the size of a fist, located in the chest, responsible for pumping blood through the body. It has four chambers — two atria and two ventricles — that work in a rhythmic cycle to deliver oxygen and nutrients to tissues. This vital organ beats continuously to keep you alive.", options:[
+      "https://static.vecteezy.com/system/resources/previews/038/050/245/original/heart-organ-icon-design-illustration-design-vector.jpg",
+      "https://tse1.explicit.bing.net/th/id/OIP.BsBylWI1ULjAYgnrIyMOigHaHa?rs=1&pid=ImgDetMain&o=7&rm=3",
+      "https://static.vecteezy.com/system/resources/previews/003/729/035/non_2x/human-brain-organ-free-vector.jpg",
+      "https://img.freepik.com/premium-vector/illustration-cartoon-liver-organ-good-education-banner-healthy-icon_337879-274.jpg?w=2000"
+    ], correct:"https://static.vecteezy.com/system/resources/previews/038/050/245/original/heart-organ-icon-design-illustration-design-vector.jpg"},
+    {name:"Liver", description:"A large, reddish-brown organ located in the upper right side of the abdomen, responsible for filtering toxins from the blood and producing bile to aid digestion. It stores nutrients, regulates blood sugar levels, and helps process medicines and chemicals. This vital organ is essential for metabolism and detoxification.", options:[
+      "https://img.freepik.com/premium-vector/illustration-cartoon-liver-organ-good-education-banner-healthy-icon_337879-274.jpg?w=2000",
+      "https://static.vecteezy.com/system/resources/previews/003/729/035/non_2x/human-brain-organ-free-vector.jpg",
+      "https://static.vecteezy.com/system/resources/previews/038/050/245/original/heart-organ-icon-design-illustration-design-vector.jpg",
+      "https://tse4.mm.bing.net/th/id/OIP.JIqNjnePV6D18rlGqIeG_AHaHa?rs=1&pid=ImgDetMain&o=7&rm=3"
+    ], correct:"https://img.freepik.com/premium-vector/illustration-cartoon-liver-organ-good-education-banner-healthy-icon_337879-274.jpg?w=2000"},
+    {name:"Brain", description:"The central organ of the human nervous system, responsible for processing information, controlling behavior, and coordinating bodily functions. It consists of the cerebrum, cerebellum, and brainstem, and communicates with the rest of the body through the spinal cord and nerves.", options:[
+      "https://static.vecteezy.com/system/resources/previews/038/050/245/original/heart-organ-icon-design-illustration-design-vector.jpg",
+      "https://tse4.mm.bing.net/th/id/OIP.KidikfGF3K4fwter1FOtOQHaHa?rs=1&pid=ImgDetMain&o=7&rm=3",
+      "https://static.vecteezy.com/system/resources/previews/003/729/035/non_2x/human-brain-organ-free-vector.jpg",
+      "https://img.freepik.com/premium-vector/illustration-cartoon-liver-organ-good-education-banner-healthy-icon_337879-274.jpg?w=2000"
+    ], correct:"https://static.vecteezy.com/system/resources/previews/003/729/035/non_2x/human-brain-organ-free-vector.jpg"},
+    {name:"Neuron", description:"A specialized cell of the nervous system that carries messages between the brain, spinal cord, and the rest of the body. It uses electrical impulses and chemical signals to transmit information rapidly. Each neuron has a cell body, dendrites to receive signals, and an axon to send them onward.", options:[
+      "https://cdn3.iconfinder.com/data/icons/human-organs-5/64/Human_Organs-04-512.png",
+      "https://png.pngtree.com/png-clipart/20211116/original/pngtree-human-kidneys-icons-illustration-art-png-image_6946022.png",
+      "https://tse1.mm.bing.net/th/id/OIP.b8vZ0YatrlaGoARJG93zHAHaHa?rs=1&pid=ImgDetMain&o=7&rm=3",
+      "https://cdn1.iconfinder.com/data/icons/biology-75/64/neuron-anatomy-body_organ-human_body-education-healthcare_and_medical-line-512.png"
+    ], correct:"https://cdn1.iconfinder.com/data/icons/biology-75/64/neuron-anatomy-body_organ-human_body-education-healthcare_and_medical-line-512.png"}
+  ],
+  hard: [
+    {stage:1,image:"https://tse3.mm.bing.net/th/id/OIP.Elyw4k6O0pzu5gqQDwRG-gAAAA?rs=1&pid=ImgDetMain&o=7&rm=3",mapping:{"A":"Mouth","B":"Liver","C":"Trachea","D":"Gallbladder","E":"Large Intestine","F":"Stomach","G":"Pancreas","H":"Small Intestine","I":"Anus"}},
+    {stage:2,image:"https://cdn1.knowledgeboat.com/img/cb8/human-heart-concise-biology-solutions-icse-class-8-493x506.jpg",mapping:{"1":"Pulmonary artery","2":"Superior vena cava","3":"Pulmonary vein","4":"Pericardium","5":"Left ventricle","6":"Right ventricle"}}
+  ]
+};
+
+let current=0, score=0, currentLevel="easy", stage=0;
+
+/* ----- Game Functions ----- */
+function showIntro(){ 
+  document.getElementById("start-page").style.display="none"; 
+  document.getElementById("intro").style.display="block"; 
+}
+
+function startGame(level){
+  currentLevel=level; current=0; score=0; stage=0;
+  document.getElementById("score").innerText="Score: 0";
+  document.getElementById("intro").style.display="none";
+  document.getElementById("game").style.display="block";
+  if(level==="easy") loadEasy();
+  else if(level==="medium") loadMedium();
+  else if(level==="hard") loadHardStage();
+}
+
+// Easy
+function loadEasy(){
+  const q=organsData.easy[current];
+  document.getElementById("organ-description").innerHTML=`<img src="${q.image}" width="150"><br>What is this organ?`;
+  const container=document.getElementById("options-container"); container.innerHTML='';
+  q.options.forEach(opt=>{
+    const btn=document.createElement("button");
+    btn.className="option-btn"; btn.innerText=opt;
+    btn.onclick=()=> checkEasyAnswer(opt,q.correct);
+    container.appendChild(btn);
+  });
+}
+function checkEasyAnswer(selected,correct){
+  if(selected===correct) score++;
+  alert(`Your answer is ${selected===correct?"correct ✅":"wrong ❌"}`);
+  document.getElementById("score").innerText="Score: "+score;
+  current++;
+  if(current>=organsData.easy.length){ alert(`🎉 Easy quiz finished! Score: ${score}/${organsData.easy.length}`); goHome(); }
+  else loadEasy();
+}
+
+// Medium
+function loadMedium(){
+  const q=organsData.medium[current];
+  document.getElementById("organ-description").innerText=q.description;
+  const container=document.getElementById("options-container"); container.innerHTML='<div class="image-options"></div>';
+  const imgDiv=container.querySelector(".image-options");
+  q.options.forEach(imgSrc=>{
+    const img=document.createElement("img");
+    img.src=imgSrc;
+    img.onclick=()=> checkMediumAnswer(imgSrc,q.correct);
+    imgDiv.appendChild(img);
+  });
+}
+function checkMediumAnswer(selected,correct){
+  if(selected===correct) score++;
+  alert(`Your answer is ${selected===correct?"correct ✅":"wrong ❌"}`);
+  document.getElementById("score").innerText="Score: "+score;
+  current++;
+  if(current>=organsData.medium.length){ alert(`🎉 Medium quiz finished! Score: ${score}/${organsData.medium.length}`); goHome(); }
+  else loadMedium();
+}
+
+// Hard
+function loadHardStage(){
+  stage++;
+  if(stage>organsData.hard.length){ alert(`🎉 Hard quiz finished! Score: ${score}`); goHome(); return; }
+  const data=organsData.hard[stage-1];
+  document.getElementById("organ-description").innerHTML=`<img src="${data.image}" width="200"><br>Drag and drop the organ names`;
+  const container=document.getElementById("options-container"); container.innerHTML='';
+
+  const numbersDiv=document.createElement("div");
+  Object.keys(data.mapping).forEach(k=>{
+    const box=document.createElement("div");
+    box.className="number-box"; box.id="box-"+k; box.dataset.key=k; box.dataset.filled="false";
+    box.ondrop=dropHard; box.ondragover=allowDrop; box.innerText=k;
+    numbersDiv.appendChild(box);
+  });
+  container.appendChild(numbersDiv);
+
+  const dragDiv=document.createElement("div"); dragDiv.className="drag-options";
+  Object.values(data.mapping).sort(()=>Math.random()-0.5).forEach(val=>{
+    const btn=document.createElement("button");
+    btn.className="option-btn"; btn.innerText=val; btn.draggable=true; btn.ondragstart=(e)=>dragAnswer(e,val);
+    dragDiv.appendChild(btn);
+  });
+  container.appendChild(dragDiv);
+
+  const submitBtn=document.createElement("button");
+  submitBtn.className="level-btn"; submitBtn.innerText="Submit Answers"; submitBtn.onclick=()=> checkHardAnswers(data.mapping,submitBtn);
+  container.appendChild(submitBtn);
+}
+
+function dragAnswer(e,val){ e.dataTransfer.setData("text",val); }
+function allowDrop(e){ e.preventDefault(); }
+function dropHard(e){
+  e.preventDefault();
+  const dragged=e.dataTransfer.getData("text"); const box=e.target;
+  if(box.dataset.filled==="true"){
+    const oldVal=box.innerText; const optionDiv=document.querySelector(".drag-options");
+    const oldBtn=document.createElement("button");
+    oldBtn.className="option-btn"; oldBtn.innerText=oldVal; oldBtn.draggable=true; oldBtn.ondragstart=(e)=>dragAnswer(e,oldVal);
+    optionDiv.appendChild(oldBtn);
+  }
+  box.innerText=dragged; box.dataset.filled="true";
+  document.querySelectorAll(".drag-options .option-btn").forEach(btn=>{ if(btn.innerText===dragged) btn.remove(); });
+}
+
+function checkHardAnswers(mapping,submitBtn){
+  let correctCount=0;
+  Object.keys(mapping).forEach(k=>{
+    const box=document.getElementById("box-"+k);
+    if(box.innerText===mapping[k]){ correctCount++; box.style.backgroundColor="#c8e6c9"; }
+    else{ box.style.backgroundColor="#ffcdd2"; box.innerText+=" ❌"; }
+  });
+  score+=correctCount;
+  document.getElementById("score").innerText="Score: "+score;
+  alert(`You got ${correctCount}/${Object.keys(mapping).length} correct!`);
+  submitBtn.remove();
+  setTimeout(loadHardStage,500);
+}
+
+function goHome(){
+  document.getElementById("game").style.display="none";
+  document.getElementById("intro").style.display="block";
+}
+</script>
+</body>
+</html>
